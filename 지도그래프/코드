@@ -1,0 +1,44 @@
+# 필요한 패키지 설치 및 로드
+library(sf)
+library(ggplot2)
+library(dplyr)
+
+# 데이터 프레임 생성
+region_data <- data.frame(
+  region = c("서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종",
+             "경기", "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주"),
+  count = c(1606, 32, 46, 43, 35, 76, 9, 11, 536, 15, 15, 20, 19, 13, 12, 11, 9))
+# 지도 데이터 불러오기
+korea_map <- st_read("C:/Users/user/Downloads/gadm41_KOR_1.json/gadm41_KOR_1.json")
+
+# 각 지역의 중심 좌표(청사기준)
+region_data$longitude <- c(127.0, 129.0, 128.6, 126.7, 126.9, 127.4, 
+                           129.3, 127.3, 127.3, 128.2, 127.5, 127.0, 
+                           127.1, 126.9, 128.6, 128.7, 126.5)
+region_data$latitude <- c(37.6, 35.2, 35.9, 37.5, 35.2, 36.3, 
+                          35.5, 36.5, 37.3, 37.9, 36.6, 36.8, 
+                          35.8, 34.9, 36.6, 35.2, 33.5)
+
+# 지도와 버블 차트 그리기
+ggplot() +
+  # 지도 레이어
+  geom_sf(data = korea_map, fill = "white", color = "darkgray") +
+  # 버블 레이어
+  geom_point(data = region_data, 
+             aes(x = longitude, y = latitude, size = count),
+             color = "red", alpha = 0.5) +
+  # 텍스트 레이어 추가
+  geom_text(data = region_data,
+            aes(x = longitude, y = latitude, label = count),
+            size = 3,  # 텍스트 크기
+            vjust = 2) +  # 텍스트 위치 조정 (버블 아래에 표시)
+  scale_size_continuous(
+    name = "기업 수",
+    breaks = c(10, 50,100, 1000),
+    range = c(2, 15),
+    labels = c("10", "50","100", "1000")
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5),
+        axis.text = element_blank(),
+        axis.title = element_blank())
